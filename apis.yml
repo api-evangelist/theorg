@@ -1,7 +1,28 @@
 aid: theorg
-name: theorg
-description: theorg is a company surfaced as a portfolio company of balderton-capital and added to the
-  API Evangelist network as a stub for enrichment. This profile is a lead awaiting the enrichment pipeline.
+accessModel:
+  pricing: unknown
+  onboarding: self-serve
+  trial: false
+  try_now: false
+  public: false
+  label: Self-serve signup
+  confidence: medium
+  source:
+  - authentication
+  generated: '2026-07-22'
+  method: derived
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/theorg.png
+name: The Org
+description: >-
+  The Org operates the world's largest network of public organizational charts, mapping
+  companies, their teams, and reporting hierarchies. Its developer platform exposes a
+  metered REST API and an official MCP server for retrieving a company's public org chart
+  by domain or LinkedIn URL, prospecting positions and people with rich filters, resolving
+  a person's manager, and monitoring credit usage. Authentication is via an account-scoped
+  X-Api-Key header over HTTPS, usage is metered in monthly credits, and the same key powers
+  a Model Context Protocol endpoint exposing get_org_chart, get_manager, get_usage, and
+  find_positions tools for agent-native access. Originally added to the API Evangelist
+  network as a portfolio company of Balderton Capital.
 url: https://raw.githubusercontent.com/api-evangelist/theorg/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -11,10 +32,36 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-17'
+modified: '2026-07-21'
 tags:
 - Company
-apis: []
+- Organizational Charts
+- People Data
+- Sales Intelligence
+- Prospecting
+- Org Chart
+- B2B Data
+- MCP
+apis:
+- name: The Org API
+  description: >-
+    REST API for retrieving public company org charts, prospecting positions/people, and
+    monitoring credit usage. Metered in credits; authenticated with an X-Api-Key header.
+  humanURL: https://developers.theorg.com/
+  baseURL: https://api.theorg.com/v1.1
+  tags:
+  - Org Chart
+  - Prospecting
+  - People Data
+  properties:
+  - type: Documentation
+    url: https://developers.theorg.com/api
+  - type: APIReference
+    url: https://developers.theorg.com/api/endpoints/company-api
+  - type: GettingStarted
+    url: https://developers.theorg.com/api/get-started
+  - type: Authentication
+    url: authentication/theorg-authentication.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
@@ -23,3 +70,51 @@ maintainers:
 common:
 - type: Website
   url: https://theorg.com/
+- type: DeveloperPortal
+  url: https://developers.theorg.com/
+- type: Documentation
+  url: https://developers.theorg.com/api
+- type: APIReference
+  url: https://developers.theorg.com/api/endpoints/company-api
+- type: GettingStarted
+  url: https://developers.theorg.com/api/get-started
+- type: ChangeLog
+  url: https://developers.theorg.com/api/change-log
+- type: ChangeLog
+  name: The Org changelog (artifact)
+  url: changelog/theorg-changelog.yml
+- type: MCPServer
+  url: mcp/theorg-mcp.yml
+- type: Authentication
+  url: authentication/theorg-authentication.yml
+- type: Conventions
+  url: conventions/theorg-conventions.yml
+- type: ErrorCatalog
+  url: errors/theorg-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/theorg-lifecycle.yml
+- type: DataModel
+  url: data-model/theorg-data-model.yml
+- type: Components
+  url: components/theorg-components.yml
+- type: RateLimits
+  url: rate-limits/theorg-rate-limits.yml
+- type: Conformance
+  url: conformance/theorg-conformance.yml
+- type: LLMsTxt
+  url: llms/theorg-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: DomainSecurity
+  url: security/theorg-domain-security.yml
+- type: Login
+  url: https://theorg.com/subscription
+- type: TermsOfService
+  url: https://theorg.com/terms
+- type: PrivacyPolicy
+  url: https://theorg.com/privacy
+x-enrichment:
+  date: '2026-07-21'
+  status: enriched
+  artifacts_added: 13
+  pass: local-v1

@@ -1,0 +1,48 @@
+generated: '2026-07-21'
+method: searched
+source: https://developers.theorg.com/api/key-concepts
+authentication:
+  style: api-key
+  header: X-Api-Key
+  transport: https-only
+base_url: https://api.theorg.com/v1.1
+versioning:
+  scheme: uri-path
+  note: >
+    Version is carried in the path (v1.1, v1.2). Endpoints can advance independently —
+    the org-chart endpoint is at v1.2 while positions/usage/mcp remain at v1.1.
+pagination:
+  style: limit-offset
+  applies_to: POST /v1.1/positions
+  params:
+    limit: integer, required, max 1000
+    offset: integer, required, max 10000
+rate_limiting:
+  limit: 15 requests per second
+  scope: per endpoint, across all API keys within an account
+  exceeded_status: 429
+  signal: HTTP 429 ("Too Many Requests")
+request_replay:
+  # NOTE: this is cost-dedup / replay caching, NOT an Idempotency-Key contract.
+  behavior: >
+    A request can be replayed any number of times within 24 hours of the initial
+    request at no additional credit cost. This is a cost/caching semantic, not a
+    write-safety idempotency key — The Org's API is read/query oriented.
+  window: 24h
+error_envelope:
+  format: custom-json
+  shape: |
+    {
+      "error": {
+        "code": <http status code>,
+        "reason": "<error description>"
+      }
+    }
+credits:
+  model: monthly credit allowance with per-endpoint credit cost
+  free_estimate_endpoint: POST /v1.1/positions/credit-usage
+cross_links:
+  errors: errors/theorg-problem-types.yml
+  lifecycle: lifecycle/theorg-lifecycle.yml
+  authentication: authentication/theorg-authentication.yml
+  rate_limits: rate-limits/theorg-rate-limits.yml

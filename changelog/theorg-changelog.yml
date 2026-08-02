@@ -1,0 +1,27 @@
+generated: '2026-07-21'
+method: searched
+source: https://developers.theorg.com/api/change-log
+scheme: dated + semver-per-endpoint
+current_version:
+  org_chart: v1.2.0
+entries:
+  - version: Org Chart v1.2.0
+    date: '2026-03-11'
+    breaking: true
+    highlights:
+      - No unplaced section — endpoint no longer returns unplaced nodes.
+      - Section parameter accepts `orgChart` or `board`.
+      - Leaner nodes — `linkedinUrl` and `workEmail` removed from responses.
+  - version: MCP Integration
+    date: '2026-02-24'
+    breaking: false
+    highlights:
+      - Added Model Context Protocol support with new documentation.
+      - New MCP endpoint over Streamable HTTP at POST https://api.theorg.com/v1.1/mcp.
+      - Tools available — get_org_chart, get_manager, get_usage, find_positions.
+  - version: Org Chart v1.1.0
+    date: '2025-10-27'
+    breaking: false
+    highlights:
+      - Endpoint now returns all associated nodes including unplaced positions.
+      - Added a `section` parameter to filter results — `orgChart`, `board`, or `unplaced`.

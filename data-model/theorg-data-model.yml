@@ -1,0 +1,95 @@
+generated: '2026-07-21'
+method: derived
+source: >
+  https://developers.theorg.com/api/data-models/{company,location,org-chart,position}
+  and endpoint reference pages
+entities:
+  - name: Company
+    description: An organization with a public org chart on The Org.
+    fields:
+      - id
+      - slug
+      - name
+      - logoUrl
+      - legalStatus
+      - domains
+      - industries
+      - employeeRange
+      - linkedInUrl
+      - websiteUrl
+      - url
+      - embedUrl
+  - name: Position
+    description: A person's role at a company; the core prospecting record.
+    fields:
+      - id
+      - slug
+      - name
+      - title
+      - bio
+      - url
+      - functions
+      - workEmail
+      - directDial
+      - profilePhotoUrl
+      - linkedInUrl
+      - twitterUrl
+      - facebookUrl
+      - startDate
+      - managerIds
+      - reportIds
+  - name: Location
+    description: Geographic location attached to a position.
+    fields:
+      - country
+      - state
+      - city
+      - latitude
+      - longitude
+  - name: ChartNode
+    description: A node in the flat org-chart response representing a position in the hierarchy.
+    fields:
+      - id
+      - jobId
+      - jobTitle
+      - managerId
+      - nodeType
+      - section
+      - positionId
+      - fullName
+      - title
+relationships:
+  - from: Position
+    to: Company
+    kind: belongs_to
+    via: currentCompany
+  - from: Position
+    to: Company
+    kind: has_many
+    via: previousCompanies
+  - from: Position
+    to: Location
+    kind: has_one
+    via: location
+  - from: Position
+    to: Position
+    kind: has_many
+    via: managerIds
+    note: managers of this position
+  - from: Position
+    to: Position
+    kind: has_many
+    via: reportIds
+    note: direct reports of this position
+  - from: ChartNode
+    to: ChartNode
+    kind: belongs_to
+    via: managerId
+  - from: ChartNode
+    to: Position
+    kind: has_one
+    via: positionId
+  - from: Company
+    to: ChartNode
+    kind: has_many
+    via: org-chart

@@ -1,0 +1,21 @@
+generated: '2026-07-21'
+method: searched
+source: https://developers.theorg.com/api/get-started
+docs: https://developers.theorg.com/api/key-concepts
+summary:
+  types: [apiKey]
+  api_key_in: [header]
+  oauth2_flows: []
+schemes:
+  - name: ApiKeyAuth
+    type: apiKey
+    in: header
+    name: X-Api-Key
+    description: >
+      All requests authenticate with an account-scoped API key passed in the
+      X-Api-Key header. Keys are created from the developer subscription page after
+      creating a free The Org account (each key is given an informative name). All
+      requests must be made over HTTPS; plain HTTP calls fail. The same key authenticates
+      the REST API and the MCP endpoint.
+    sources: [https://developers.theorg.com/api/get-started]
+transport: https-required

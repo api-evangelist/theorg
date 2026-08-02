@@ -1,0 +1,35 @@
+generated: '2026-07-21'
+method: searched
+status: published
+source: https://developers.theorg.com/api/endpoints/mcp-api
+server:
+  name: theorg
+  transport: http          # Streamable HTTP (each JSON-RPC message is a separate POST)
+  url: https://api.theorg.com/v1.1/mcp
+  protocol: json-rpc-2.0
+  auth:
+    type: apiKey
+    in: header
+    name: X-Api-Key
+notes: >
+  The Org exposes an official MCP endpoint over Streamable HTTP. Clients follow the
+  standard JSON-RPC 2.0 handshake (initialize -> initialized notification -> tools/list
+  / tools/call). Authenticated with the same X-Api-Key header as the REST API; tool
+  calls consume the same account credits as the equivalent REST endpoints.
+tools:
+  - name: get_org_chart
+    description: Full org chart by domain or LinkedIn URL.
+    cost: 10 credits per request
+    source_operation: GET /v1.2/companies/org-chart
+  - name: get_manager
+    description: Manager of a person (by email or LinkedIn URL).
+    cost: 1 credit per find
+    source_operation: GET /v1.1/companies/org-chart/managers
+  - name: get_usage
+    description: Current account usage / remaining credits.
+    cost: free
+    source_operation: GET /v1.1/usage
+  - name: find_positions
+    description: Search positions with filters.
+    cost: 1 credit per returned row
+    source_operation: POST /v1.1/positions

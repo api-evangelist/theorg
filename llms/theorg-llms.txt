@@ -1,0 +1,47 @@
+# The Org
+
+> The Org operates the world's largest network of public organizational charts. Its developer platform exposes a REST API and an official MCP server for retrieving company org charts, prospecting positions/people, resolving a person's manager, and monitoring credit usage. Authentication is via an account-scoped `X-Api-Key` header over HTTPS; usage is metered in monthly credits.
+
+## API
+- The Org API (base): https://api.theorg.com/v1.1
+- Developer portal / docs: https://developers.theorg.com/
+- Getting started: https://developers.theorg.com/api/get-started
+- Key concepts: https://developers.theorg.com/api/key-concepts
+- Changelog: https://developers.theorg.com/api/change-log
+
+## Endpoints
+- Find Org Chart: GET https://api.theorg.com/v1.2/companies/org-chart (params: linkedInUrl, domain, section=orgChart|board)
+- Find Manager: GET https://api.theorg.com/v1.1/companies/org-chart/managers (params: email, linkedInUrl)
+- Find Positions: POST https://api.theorg.com/v1.1/positions (body: limit, offset, filters)
+- Estimate credit usage: POST https://api.theorg.com/v1.1/positions/credit-usage
+- Current usage: GET https://api.theorg.com/v1.1/usage
+- Usage history: GET https://api.theorg.com/v1.1/usage/history
+- MCP endpoint: POST https://api.theorg.com/v1.1/mcp (Streamable HTTP, JSON-RPC 2.0)
+
+## MCP Tools
+- get_org_chart — full org chart by domain or LinkedIn
+- get_manager — manager of a person by email/LinkedIn
+- get_usage — current account usage/credits
+- find_positions — search positions with filters
+
+## Data Models
+- Company: https://developers.theorg.com/api/data-models/company
+- Location: https://developers.theorg.com/api/data-models/location
+- Org Chart: https://developers.theorg.com/api/data-models/org-chart
+- Position: https://developers.theorg.com/api/data-models/position
+
+## Integrations
+- MCP: https://developers.theorg.com/mcp
+- Zapier: https://developers.theorg.com/zapier
+- Embed org charts: https://developers.theorg.com/embed
+
+## Conventions
+- Auth: X-Api-Key header, HTTPS required
+- Rate limit: 15 requests/second per endpoint (429 on exceed)
+- Pagination: limit/offset (positions)
+- Error envelope: {"error":{"code":<status>,"reason":"<text>"}}
+- Credits: monthly allowance; per-endpoint cost; 24h free replay
+
+## Legal
+- Terms: https://theorg.com/terms
+- Privacy: https://theorg.com/privacy

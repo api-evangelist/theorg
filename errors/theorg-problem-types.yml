@@ -1,0 +1,33 @@
+generated: '2026-07-21'
+method: searched
+source: https://developers.theorg.com/api/key-concepts
+format: custom-json
+envelope:
+  field: error
+  shape: |
+    {
+      "error": {
+        "code": <http status code>,
+        "reason": "<error description>"
+      }
+    }
+  note: >
+    The Org does not use RFC 9457 application/problem+json. Errors are returned as a
+    JSON object with a single `error` member carrying the HTTP status `code` and a
+    human-readable `reason`.
+problems:
+  - status: 401
+    reason: Missing or invalid API key.
+    remediation: Supply a valid X-Api-Key header for the account.
+  - status: 402
+    reason: Insufficient credits for the requested operation.
+    remediation: >
+      Check remaining credits at GET /v1.1/usage, or estimate cost first with
+      POST /v1.1/positions/credit-usage.
+  - status: 429
+    reason: Too Many Requests — exceeded 15 requests/second for the endpoint.
+    remediation: Back off and retry; the rate limit is per endpoint across the account's keys.
+notes: >
+  Documented status semantics harvested from the key-concepts page. 401/402 are inferred
+  from the api-key + credit model The Org documents; 429 is documented verbatim. No full
+  error-code registry is published by the provider.

@@ -1,0 +1,25 @@
+generated: '2026-07-21'
+method: derived
+source: https://developers.theorg.com/api/key-concepts
+standards:
+  - id: https-required
+    conforms: true
+    evidence: All API requests must be made over HTTPS; plain HTTP calls fail.
+  - id: api-key-auth
+    conforms: true
+    evidence: X-Api-Key header authentication documented for REST and MCP.
+  - id: mcp
+    conforms: true
+    evidence: Official MCP endpoint over Streamable HTTP with JSON-RPC 2.0 handshake and four tools.
+  - id: json-rpc-2.0
+    conforms: true
+    evidence: MCP endpoint uses JSON-RPC 2.0 (initialize / tools/list / tools/call).
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: Errors use a custom {error:{code,reason}} envelope, not application/problem+json.
+  - id: oauth2
+    conforms: false
+    evidence: No OAuth2 flows documented; auth is API-key only.
+  - id: rest-limit-offset-pagination
+    conforms: true
+    evidence: Positions search uses required limit/offset parameters.

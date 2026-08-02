@@ -1,0 +1,14 @@
+generated: '2026-07-21'
+method: generated
+source: >
+  Grounded in operations documented at https://developers.theorg.com/api (Company API,
+  Position API, Usage API). No provider-published Agent Skills / AGENTS.md were found.
+skills:
+  - file: theorg-fetch-org-chart.md
+    name: Fetch a company org chart
+    api: https://developers.theorg.com/api/endpoints/company-api
+    operations: [get_org_chart]
+  - file: theorg-prospect-positions.md
+    name: Prospect positions
+    api: https://developers.theorg.com/api/endpoints/position-api
+    operations: [find_positions, get_usage]

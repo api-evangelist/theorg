@@ -1,0 +1,25 @@
+generated: '2026-07-21'
+method: searched
+source: https://developers.theorg.com/api/key-concepts
+rate_limits:
+  - scope: per-endpoint
+    limit_count: 15
+    interval: second
+    applies_to: each endpoint, aggregated across all API keys within an account
+    exceeded_status: 429
+    exceeded_reason: Too Many Requests
+credit_model:
+  monthly_credits: 100
+  free_account_monthly_credits: 10
+  max_additional_credits_monthly: 240000
+  per_endpoint_cost:
+    "/companies/org-chart": 10 credits per request
+    "/companies/org-chart/managers": 1 credit per successful find
+    "/positions": 1 credit per returned row
+    "/usage": free
+    "/positions/credit-usage": free
+  replay: Requests may be replayed any number of times within 24h of the initial request at no additional cost.
+notes: >
+  The Org enforces both a request-rate limit (15 req/s per endpoint) and a monthly
+  credit allowance. Credit cost varies by endpoint; the free credit-usage endpoint
+  estimates cost before spending.

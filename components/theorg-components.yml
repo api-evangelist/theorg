@@ -1,0 +1,18 @@
+generated: '2026-07-21'
+method: searched
+source: https://developers.theorg.com/embed
+components:
+  - family: Embed
+    name: Embed Org Charts
+    type: embeddable-widget
+    description: >
+      Prebuilt, hosted embeddable org-chart surface — companies can embed their public
+      The Org organizational chart into their own site. Each Company object exposes an
+      `embedUrl` used to render the embed.
+    docs: https://developers.theorg.com/embed
+    get_started: https://developers.theorg.com/embed/get-started
+    render_field: Company.embedUrl
+notes: >
+  The Org ships an embeddable org-chart component (distinct from server-side SDKs, of
+  which none are published). Zapier is offered as a no-code integration surface at
+  https://developers.theorg.com/zapier but is an automation connector, not a UI component.
