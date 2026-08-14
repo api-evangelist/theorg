@@ -20,9 +20,12 @@ description: >-
   by domain or LinkedIn URL, prospecting positions and people with rich filters, resolving
   a person's manager, and monitoring credit usage. Authentication is via an account-scoped
   X-Api-Key header over HTTPS, usage is metered in monthly credits, and the same key powers
-  a Model Context Protocol endpoint exposing get_org_chart, get_manager, get_usage, and
-  find_positions tools for agent-native access. Originally added to the API Evangelist
-  network as a portfolio company of Balderton Capital.
+  a remote Model Context Protocol endpoint exposing thirteen tools for agent-native access —
+  company and person lookup, job search, reporting-line traversal, work-email resolution, and
+  lead-list management. The MCP surface is materially wider than the REST API: eight of the
+  thirteen tools have no REST equivalent, and list creation is the only write operation The
+  Org exposes anywhere. Originally added to the API Evangelist network as a portfolio company
+  of Balderton Capital.
 url: https://raw.githubusercontent.com/api-evangelist/theorg/refs/heads/main/apis.yml
 x-type: company
 x-source: vc-portfolio
@@ -32,7 +35,7 @@ x-tier: stub
 x-tier-reason: portfolio-lead
 specificationVersion: '0.20'
 created: '2026-07-17'
-modified: '2026-07-21'
+modified: '2026-08-14'
 tags:
 - Company
 - Organizational Charts
@@ -42,6 +45,10 @@ tags:
 - Org Chart
 - B2B Data
 - MCP
+- Contact Data
+- Lead Generation
+- Jobs
+- Agents
 apis:
 - name: The Org API
   description: >-
@@ -68,6 +75,8 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: TrustCenter
+  url: security/theorg-trust-center.yml
 - type: Website
   url: https://theorg.com/
 - type: DeveloperPortal
@@ -85,8 +94,13 @@ common:
   url: changelog/theorg-changelog.yml
 - type: MCPServer
   url: mcp/theorg-mcp.yml
+- type: ToolCrosswalk
+  name: The Org MCP tool to REST crosswalk
+  url: mcp/theorg-tool-crosswalk.yml
 - type: Authentication
   url: authentication/theorg-authentication.yml
+- type: OAuthScopes
+  url: scopes/theorg-scopes.yml
 - type: Conventions
   url: conventions/theorg-conventions.yml
 - type: ErrorCatalog
@@ -107,6 +121,18 @@ common:
   url: skills/_index.yml
 - type: DomainSecurity
   url: security/theorg-domain-security.yml
+- type: WellKnown
+  url: well-known/theorg-well-known.yml
+- type: Plans
+  url: plans/theorg-plans-pricing.yml
+- type: Pricing
+  url: https://theorg.com/pricing
+- type: Support
+  url: https://support.theorg.com/en/
+- type: Blog
+  url: https://blog.theorg.com/
+- type: SignUp
+  url: https://theorg.com/signup
 - type: Login
   url: https://theorg.com/subscription
 - type: TermsOfService
@@ -114,7 +140,7 @@ common:
 - type: PrivacyPolicy
   url: https://theorg.com/privacy
 x-enrichment:
-  date: '2026-07-21'
+  date: '2026-08-14'
   status: enriched
-  artifacts_added: 13
+  artifacts_added: 7
   pass: local-v1
