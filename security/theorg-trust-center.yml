@@ -1,0 +1,52 @@
+generated: '2026-08-14'
+method: searched
+probe: true
+source: https://theorg.com/trust
+url: https://theorg.com/trust
+certifications: []
+certifications_in_progress:
+- name: ISO 27001/2
+  status: in-progress
+  claim: 'We are enhancing our security controls to be aligned with ISO 27001/2'
+- name: SOC 2
+  status: in-progress
+  claim: 'Independent third-party audits to achieve SOC 2 certification.'
+certification_note: >-
+  CORRECTION APPLIED. The mechanical probe extracted "SOC 2" and "ISO 27001" as held
+  certifications from keyword matching. Reading the page shows both are ASPIRATIONAL: the
+  copy is "We are enhancing our security controls to be aligned with ISO 27001/2, and
+  SOC-2 certification" and "Independent third-party audits to achieve SOC 2 certification".
+  No attestation, report, certificate, audit date or auditor is published, and there is no
+  gated trust portal to request one from. Recording these as achieved would credit The Org
+  with a compliance posture it has not claimed, so certifications[] is empty and NO
+  `Compliance` pointer is emitted in apis.yml.
+scope_of_program:
+  controls: Security, Availability, Confidentiality
+  claim: 'Robust controls to uphold Security, Availability, and Confidentiality.'
+  reviews: 'Ongoing reviews to ensure compliance with data privacy laws and regulations.'
+privacy_posture:
+  data_sourcing:
+  - Monitoring of team pages on company websites for leadership changes
+  - News aggregation — press releases and announcements about new hires and promotions
+  - Tracking of updates and changes to public LinkedIn profiles
+  - User generated content from professionals maintaining their own public org chart
+  claim: >-
+    'We only process public professional data, regardless of where an individual is based,
+    across all of our solutions.'
+  subject_controls:
+  - Join your company and edit contact/position pages
+  - Report wrong information via the report function
+  - Opt out of appearing on The Org
+  opt_out_url: https://theorg.com/do-not-sell
+  opt_out_label: Do not sell or share my information
+  note: >-
+    Relevant to this provider specifically: the product is a people-data platform built
+    substantially from third-party public data, so the trust page functions as a data-subject
+    rights surface as much as a security one. No GDPR, CCPA or HIPAA program is named,
+    and no subprocessor list is published.
+legal_entity: Orgio, Inc.
+certifications_source: https://theorg.com/trust
+evidence:
+- source: https://theorg.com/trust
+  http_status: 200
+  keywords: [iso 27001, soc 2, trust center, privacy, security controls]

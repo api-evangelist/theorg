@@ -1,14 +1,24 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: generated
 source: >
   Grounded in operations documented at https://developers.theorg.com/api (Company API,
-  Position API, Usage API). No provider-published Agent Skills / AGENTS.md were found.
+  Position API, Lists API, Usage API) and the MCP tool catalog at
+  https://developers.theorg.com/mcp. No provider-published Agent Skills or AGENTS.md exist —
+  https://developers.theorg.com/llms.txt and /AGENTS.md were probed and return 404.
+grounding_note: >-
+  The Org publishes no OpenAPI, so operations are named by documented METHOD + PATH and by
+  provider-published MCP tool name rather than by operationId. Every operation referenced in
+  these skills appears verbatim in the provider's own reference or tool catalog.
 skills:
-  - file: theorg-fetch-org-chart.md
-    name: Fetch a company org chart
-    api: https://developers.theorg.com/api/endpoints/company-api
-    operations: [get_org_chart]
-  - file: theorg-prospect-positions.md
-    name: Prospect positions
-    api: https://developers.theorg.com/api/endpoints/position-api
-    operations: [find_positions, get_usage]
+- file: theorg-fetch-org-chart.md
+  name: Fetch a company org chart
+  api: https://developers.theorg.com/api/endpoints/company-api
+  operations: ['GET /v1.2/companies/org-chart', get_org_chart, get_usage]
+- file: theorg-prospect-positions.md
+  name: Prospect positions
+  api: https://developers.theorg.com/api/endpoints/position-api
+  operations: ['POST /v1.1/positions', 'POST /v1.1/positions/credit-usage', 'GET /v1.1/usage']
+- file: theorg-build-lead-list.md
+  name: Build a lead list from an org chart
+  api: https://developers.theorg.com/mcp
+  operations: [search_companies, get_company, find_positions, resolve_contacts, create_list, add_to_list, get_lists, get_usage]

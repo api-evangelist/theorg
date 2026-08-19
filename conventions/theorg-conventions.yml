@@ -1,34 +1,80 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 source: https://developers.theorg.com/api/key-concepts
 authentication:
   style: api-key
   header: X-Api-Key
   transport: https-only
+  also_accepted:
+  - 'Authorization: Bearer (OAuth 2.1, MCP endpoint — undocumented but live)'
+  - 'api_key query parameter (undocumented; credential in URL)'
+  detail: authentication/theorg-authentication.yml
 base_url: https://api.theorg.com/v1.1
 versioning:
   scheme: uri-path
   note: >
-    Version is carried in the path (v1.1, v1.2). Endpoints can advance independently —
-    the org-chart endpoint is at v1.2 while positions/usage/mcp remain at v1.1.
+    Version is carried in the path (v1.1, v1.2). Endpoints advance independently — the
+    org-chart endpoint is at v1.2 while positions, lists, usage and mcp remain at v1.1.
+    The Lists API is documented as available on both v1.1 and v1.2.
 pagination:
   style: limit-offset
-  applies_to: POST /v1.1/positions
-  params:
-    limit: integer, required, max 1000
-    offset: integer, required, max 10000
+  surfaces:
+  - operation: POST /v1.1/positions
+    limit: {type: integer, required: true, max: 1000}
+    offset: {type: integer, required: true, max: 10000}
+    total_field: data.totalResults
+  - operation: GET /v1.1/lists
+    limit: {type: integer, required: false, min: 1, max: 100, default: 30}
+    offset: {type: integer, required: false, default: 0}
+    total_field: total
+  note: >-
+    Not uniform. Positions REQUIRES both parameters and allows a 1000-row page; Lists makes
+    both optional with a 30-row default and a 100 ceiling. There is no cursor, no link
+    header, and no next-page token anywhere.
+  mcp_divergence: >-
+    MCP tools do not expose limit/offset — find_positions caps at 25 rows per call,
+    find_jobs at 25, get_reports at 50, with no documented way to page past the cap.
 rate_limiting:
   limit: 15 requests per second
   scope: per endpoint, across all API keys within an account
   exceeded_status: 429
   signal: HTTP 429 ("Too Many Requests")
+  response_headers: none
+  headers_note: >-
+    The Org documents no RateLimit-* or X-RateLimit-* response headers and no Retry-After.
+    A client learns it is over the limit only by receiving a 429 — there is no runtime
+    signal that lets an agent pace itself before being rejected.
+  detail: rate-limits/theorg-rate-limits.yml
+idempotency:
+  supported: false
+  key_header: null
+  note: >-
+    The Org publishes NO idempotency-key contract. There is no Idempotency-Key header, no
+    request-fingerprint deduplication for writes, and no documented retry-safety guarantee.
+    The two write operations that exist (create_list, add_to_list, both MCP-only) have no
+    idempotency semantics documented, so a retried list creation can duplicate. No
+    `Idempotency` pointer is emitted in apis.yml — see request_replay below for the
+    adjacent-but-different mechanism that must not be mistaken for one.
 request_replay:
   # NOTE: this is cost-dedup / replay caching, NOT an Idempotency-Key contract.
   behavior: >
-    A request can be replayed any number of times within 24 hours of the initial
-    request at no additional credit cost. This is a cost/caching semantic, not a
-    write-safety idempotency key — The Org's API is read/query oriented.
+    "Requests can be replayed any amount of times within 24 hours of the initial request at
+    no additional cost." For positions specifically, "a specific row can be returned
+    multiple times at no additional cost within 24 hours of the initial return", and
+    re-resolving a contact the account has already paid for is free.
   window: 24h
+  semantics: billing
+  not_idempotency: >-
+    This guarantees you are not charged twice, not that the operation happens once. It is a
+    credit-dedup rule on a read/query-oriented API, and it says nothing about write safety.
+request_tracing:
+  request_id_header: null
+  note: >-
+    No request-id or correlation header is documented on requests or responses. The API host
+    does advertise CORS support for `traceparent` and `tracestate`
+    (Access-Control-Allow-Headers on api.theorg.com), so W3C Trace Context headers are
+    accepted from browsers, but no trace or request identifier is documented as returned —
+    there is nothing to quote to support when a call goes wrong.
 error_envelope:
   format: custom-json
   shape: |
@@ -38,11 +84,25 @@ error_envelope:
         "reason": "<error description>"
       }
     }
+  status_codes: [200, 400, 401, 402, 404, 429, 500, 503, 504]
+  detail: errors/theorg-problem-types.yml
+field_expansion:
+  supported: false
+  note: No expand, fields, or sparse-fieldset parameter is documented on any endpoint.
+metadata:
+  supported: false
+  note: No customer-supplied metadata can be attached to any object.
 credits:
-  model: monthly credit allowance with per-endpoint credit cost
+  model: seat credit allowance with per-endpoint credit cost, shared across REST and MCP
   free_estimate_endpoint: POST /v1.1/positions/credit-usage
+  balance_endpoint: GET /v1.1/usage
+  history_endpoint: GET /v1.1/usage/history
+  exhausted_status: 402
+  detail: plans/theorg-plans-pricing.yml
 cross_links:
   errors: errors/theorg-problem-types.yml
   lifecycle: lifecycle/theorg-lifecycle.yml
   authentication: authentication/theorg-authentication.yml
   rate_limits: rate-limits/theorg-rate-limits.yml
+  scopes: scopes/theorg-scopes.yml
+  plans: plans/theorg-plans-pricing.yml

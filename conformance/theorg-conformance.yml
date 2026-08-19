@@ -1,25 +1,96 @@
-generated: '2026-07-21'
-method: derived
-source: https://developers.theorg.com/api/key-concepts
+generated: '2026-08-14'
+method: probed
+source: >-
+  https://developers.theorg.com/api/key-concepts plus live probes of
+  https://api.theorg.com/.well-known/* and POST https://api.theorg.com/v1.1/mcp
 standards:
-  - id: https-required
-    conforms: true
-    evidence: All API requests must be made over HTTPS; plain HTTP calls fail.
-  - id: api-key-auth
-    conforms: true
-    evidence: X-Api-Key header authentication documented for REST and MCP.
-  - id: mcp
-    conforms: true
-    evidence: Official MCP endpoint over Streamable HTTP with JSON-RPC 2.0 handshake and four tools.
-  - id: json-rpc-2.0
-    conforms: true
-    evidence: MCP endpoint uses JSON-RPC 2.0 (initialize / tools/list / tools/call).
-  - id: rfc9457-problem-details
-    conforms: false
-    evidence: Errors use a custom {error:{code,reason}} envelope, not application/problem+json.
-  - id: oauth2
-    conforms: false
-    evidence: No OAuth2 flows documented; auth is API-key only.
-  - id: rest-limit-offset-pagination
-    conforms: true
-    evidence: Positions search uses required limit/offset parameters.
+- id: https-required
+  conforms: true
+  evidence: All API requests must be made over HTTPS; plain HTTP calls fail.
+- id: api-key-auth
+  conforms: true
+  evidence: X-Api-Key header authentication documented for REST and MCP.
+- id: mcp
+  conforms: true
+  evidence: >-
+    Official MCP endpoint over Streamable HTTP with JSON-RPC 2.0 handshake, 13 published
+    tools, and MCP-Protocol-Version support for 2025-11-25 and 2025-03-26.
+- id: json-rpc-2.0
+  conforms: true
+  evidence: MCP endpoint uses JSON-RPC 2.0 (initialize / tools/list / tools/call).
+- id: oauth2
+  conforms: true
+  evidence: >-
+    Authorization server metadata live at https://api.theorg.com/.well-known/oauth-authorization-server
+    (HTTP 200) — authorization_code grant, response_type code, issuer https://api.theorg.com.
+    Upgraded from conforms:false at the 2026-07-21 pass, when this surface did not exist.
+- id: oauth2.1
+  conforms: true
+  evidence: >-
+    Public client profile with mandatory PKCE — code_challenge_methods_supported [S256],
+    token_endpoint_auth_methods_supported [none], grant_types_supported [authorization_code]
+    only. No implicit or password grant is offered, which is the OAuth 2.1 shape.
+- id: rfc8414-oauth-authorization-server-metadata
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns 200 application/json with issuer, authorization_endpoint, token_endpoint.
+- id: rfc9728-oauth-protected-resource-metadata
+  conforms: true
+  evidence: >-
+    /.well-known/oauth-protected-resource returns 200 naming resource
+    https://api.theorg.com/v1.1/mcp, its authorization_servers, scopes_supported [mcp] and
+    bearer_methods_supported [header]. The per-resource path
+    /.well-known/oauth-protected-resource/v1.1/mcp also returns 200 and is advertised in the
+    401 WWW-Authenticate challenge, which is the RFC 9728 discovery handshake working end to end.
+- id: rfc7591-dynamic-client-registration
+  conforms: true
+  evidence: registration_endpoint https://api.theorg.com/oauth/register advertised, with client_id_metadata_document_supported true.
+- id: rfc6750-bearer-token-usage
+  conforms: true
+  evidence: >-
+    Unauthenticated POST to the MCP endpoint returns 401 with a conformant
+    'WWW-Authenticate: Bearer realm="mcp", resource_metadata="...", scope=mcp' challenge.
+- id: oidc
+  conforms: false
+  evidence: /.well-known/openid-configuration returns 404 on all hosts; the OAuth server issues access tokens only, no id_token or userinfo.
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: Errors use a custom {error:{code,reason}} envelope, not application/problem+json.
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt returns 404 on api.theorg.com, developers.theorg.com and theorg.com.
+- id: rfc8594-sunset-header
+  conforms: false
+  evidence: >-
+    No Sunset or Deprecation header support and no deprecation policy. Breaking changes
+    (org-chart v1.2.0 field removals, the 2026-08-13 get_org_chart return-type change) were
+    announced in the changelog only.
+- id: openapi
+  conforms: false
+  evidence: >-
+    No OpenAPI or Swagger document is published. /openapi.json, /openapi.yaml, /swagger.json,
+    /v1.1/openapi.json, /api-docs, /docs and /redoc all 404 on api.theorg.com,
+    developers.theorg.com and theorg.com.
+- id: asyncapi
+  conforms: false
+  not_applicable: true
+  evidence: >-
+    The Org publishes no event, streaming or webhook surface at all — bulk delivery is
+    monthly gzipped LDJSON snapshots over SFTP. There is no event surface to describe, so
+    this is N/A rather than a gap.
+- id: a2a-agent-card
+  conforms: false
+  evidence: /.well-known/agent-card.json and /.well-known/agent.json return 404 on every host.
+- id: rest-limit-offset-pagination
+  conforms: true
+  evidence: >-
+    Positions search requires limit (max 1000) and offset (max 10000); the Lists API takes
+    optional limit (1–100, default 30) and offset (default 0).
+- id: graphql
+  conforms: false
+  evidence: No GraphQL surface documented or discoverable.
+compliance_programs:
+  published_certifications: []
+  note: >-
+    https://theorg.com/trust states ISO 27001/2 alignment and SOC 2 certification are being
+    pursued; neither is held. No `Compliance` pointer is emitted — see
+    security/theorg-trust-center.yml.

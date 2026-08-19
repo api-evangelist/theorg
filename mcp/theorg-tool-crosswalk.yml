@@ -1,0 +1,144 @@
+generated: '2026-08-14'
+method: derived
+source: >-
+  mcp/theorg-mcp.yml (provider-published MCP tool catalog) bound against the REST
+  operations documented at https://developers.theorg.com/api/endpoints/
+  {company-api,position-api,lists-api,usage-api}
+surfaces:
+  openapi:
+    present: false
+    note: >-
+      The Org publishes NO OpenAPI. /openapi.json, /openapi.yaml, /swagger.json,
+      /v1.1/openapi.json, /api-docs, /docs and /redoc were probed on api.theorg.com,
+      developers.theorg.com and theorg.com — all 404. REST operations below are therefore
+      identified by documented METHOD + PATH, not by operationId, because no operationIds
+      exist to bind to.
+  rest:
+    base_url: https://api.theorg.com/v1.1
+    docs: https://developers.theorg.com/api
+    auth: X-Api-Key header
+    gated: false
+    note: Reference docs are public; the operations themselves require a key.
+  graphql:
+    present: false
+  mcp:
+    url: https://api.theorg.com/v1.1/mcp
+    transport: streamable-http
+    gated: true
+    note: >-
+      Live tools/list returns 401 unauthenticated, so tool names/descriptions come from
+      the provider's published catalog and per-tool inputSchema could not be read.
+      Confidence below reflects name/semantic matching against documented REST params,
+      not schema-level comparison.
+crosswalk:
+- tool: get_org_chart
+  category: org-chart
+  rest: ['GET /v1.2/companies/org-chart']
+  binding: rest
+  confidence: medium
+  note: >-
+    Same capability, DIVERGED PAYLOAD. Since 2026-08-13 the tool returns a signed iframe
+    embed URL (/embeds/org-chart/{signature}) and costs nothing, while the REST operation
+    returns a flat ChartNode list and costs 10 credits. An agent calling the tool gets a
+    rendering surface; an integrator calling REST gets data. Not interchangeable.
+- tool: get_manager
+  category: reporting-line
+  rest: ['GET /v1.1/companies/org-chart/managers']
+  binding: rest
+  confidence: high
+  note: >-
+    Direct equivalent. REST accepts email or linkedInUrl; the tool additionally accepts
+    positionId (added 2026-08-13), so the tool input surface is a superset.
+- tool: find_positions
+  category: prospecting
+  rest: ['POST /v1.1/positions', 'POST /v1.1/positions/credit-usage']
+  binding: rest
+  confidence: high
+  note: >-
+    Same filter-based position search. REST allows limit up to 1000 / offset up to 10000;
+    the tool caps a call at 25 rows. The free credit-usage estimator is listed as a second
+    backing operation because it shares the same filters object and is the pre-flight cost
+    check for the same query.
+- tool: get_lists
+  category: lists
+  rest: ['GET /v1.1/lists']
+  binding: rest
+  confidence: high
+  note: Direct equivalent; both free, both paginated by limit/offset.
+- tool: get_usage
+  category: account
+  rest: ['GET /v1.1/usage', 'GET /v1.1/usage/history']
+  binding: rest
+  confidence: high
+  note: >-
+    The tool is documented as "Check your remaining API credits and usage", matching the
+    current-usage operation; the history operation is included as a related REST surface
+    with no dedicated tool.
+mcp_only:
+- tool: search_companies
+  reason: >-
+    No public REST company-search operation. The REST Company API exposes only org-chart
+    and manager lookups — there is no documented endpoint that resolves a company by name,
+    domain, email or LinkedIn URL.
+- tool: get_company
+  reason: >-
+    No public REST company-profile operation. Enriched company fields (description, size,
+    location, industries, funding) are returned by this tool only.
+- tool: find_person
+  reason: >-
+    No public REST person-resolution operation. REST reaches people only through position
+    search (POST /v1.1/positions) or manager lookup.
+- tool: find_jobs
+  reason: >-
+    No public REST jobs operation. Open-vacancy search exists on the agent surface only;
+    on the data side, job posts appear in the SFTP flat-file dumps.
+- tool: get_reports
+  reason: >-
+    No public REST direct-reports operation. REST exposes managers (upward) but not
+    reports (downward) as a first-class lookup; reportIds appear inside position payloads.
+- tool: resolve_contacts
+  reason: >-
+    No public REST contact-resolution operation. Work-email resolution as an explicit,
+    metered action is MCP-only; REST surfaces workEmail only as a field on position rows.
+- tool: add_to_list
+  reason: >-
+    Write operation with no REST counterpart. The Lists API is read-only (GET /v1.1/lists);
+    list mutation exists on the agent surface only.
+- tool: create_list
+  reason: >-
+    Write operation with no REST counterpart, same as add_to_list. These two tools are the
+    only writes anywhere in The Org's public API surface.
+rest_only:
+- capability: credit estimation
+  rest: ['POST /v1.1/positions/credit-usage']
+  note: >-
+    Free pre-flight cost estimate for a positions query. Also bound above as a secondary
+    operation for find_positions, but has no tool of its own — an agent cannot price a
+    query before spending credits on it.
+- capability: historical usage reporting
+  rest: ['GET /v1.1/usage/history']
+  note: >-
+    Per-API daily/monthly usage series (prospecting_api, manager_api, org_chart_api).
+    No MCP tool exposes usage history.
+- capability: org-chart data retrieval
+  rest: ['GET /v1.2/companies/org-chart']
+  note: >-
+    The DATA form of the org chart (ChartNode list) is REST-only since 2026-08-13, when the
+    tool of the same name switched to returning an embed URL. Listed in both crosswalk[]
+    and rest_only[] deliberately: the name is bound, the payload is not.
+coverage:
+  tools_published: 13
+  tools_bound_to_rest: 5
+  mcp_only_tools: 8
+  rest_operations_documented: 6
+  rest_operations_with_a_tool: 5
+  rest_only_capabilities: 3
+  write_operations_rest: 0
+  write_operations_mcp: 2
+divergence_summary: >-
+  MCP is the WIDER surface, not a projection of REST. 8 of 13 tools (62%) have no REST
+  equivalent, including every company-search, person, jobs, reports and contact-resolution
+  capability, plus the only two write operations The Org ships anywhere. The one nominal
+  overlap that looks strongest by name — get_org_chart — is the weakest in practice, because
+  the tool and the REST operation now return different things at different prices. A consumer
+  choosing between the two surfaces is choosing between different products.

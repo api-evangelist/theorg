@@ -1,21 +1,86 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 source: https://developers.theorg.com/api/get-started
 docs: https://developers.theorg.com/api/key-concepts
 summary:
-  types: [apiKey]
+  types: [apiKey, oauth2]
   api_key_in: [header]
-  oauth2_flows: []
+  oauth2_flows: [authorizationCode]
 schemes:
-  - name: ApiKeyAuth
-    type: apiKey
-    in: header
-    name: X-Api-Key
-    description: >
-      All requests authenticate with an account-scoped API key passed in the
-      X-Api-Key header. Keys are created from the developer subscription page after
-      creating a free The Org account (each key is given an informative name). All
-      requests must be made over HTTPS; plain HTTP calls fail. The same key authenticates
-      the REST API and the MCP endpoint.
-    sources: [https://developers.theorg.com/api/get-started]
+- name: ApiKeyAuth
+  type: apiKey
+  in: header
+  parameter_name: X-Api-Key
+  applies_to: [REST API, MCP endpoint]
+  description: >
+    All requests authenticate with an account-scoped API key passed in the
+    X-Api-Key header. Keys are created from the developer subscription page after
+    creating a free The Org account (each key is given an informative name). All
+    requests must be made over HTTPS; plain HTTP calls fail. The same key authenticates
+    the REST API and the MCP endpoint — the MCP docs state "Authentication uses your
+    existing API key. No separate MCP sign-up is required."
+  sources:
+  - https://developers.theorg.com/api/get-started
+  - https://developers.theorg.com/api/key-concepts
+  - https://developers.theorg.com/mcp
+- name: OAuth2
+  type: oauth2
+  applies_to: [MCP endpoint]
+  issuer: https://api.theorg.com
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://api.theorg.com/oauth/authorize
+    tokenUrl: https://api.theorg.com/oauth/token
+    pkce_methods: [S256]
+    token_endpoint_auth_methods: [none]
+    scopes: [mcp]
+  registration_endpoint: https://api.theorg.com/oauth/register
+  dynamic_client_registration: true
+  description: >
+    An OAuth 2.1 authorization server (public client, authorization code + PKCE S256,
+    RFC 7591 dynamic client registration) gates the MCP endpoint at
+    https://api.theorg.com/v1.1/mcp. It is discoverable but UNDOCUMENTED: the
+    key-concepts and MCP pages describe only X-Api-Key, while the API host serves live
+    RFC 8414 and RFC 9728 metadata and an unauthenticated POST to the MCP endpoint
+    answers 401 with
+    'WWW-Authenticate: Bearer realm="mcp", resource_metadata=..., scope=mcp'.
+  sources:
+  - https://api.theorg.com/.well-known/oauth-authorization-server
+  - https://api.theorg.com/.well-known/oauth-protected-resource
+  scopes_artifact: scopes/theorg-scopes.yml
+accepted_credentials:
+  note: >-
+    The MCP 401 body enumerates the accepted credential forms verbatim:
+    "Missing credentials. Provide Authorization: Bearer, X-Api-Key, or the api_key
+    query parameter." The api_key query-string form is a credential-in-URL pattern
+    that leaks into logs, referrers and browser history; it is not documented on the
+    developer portal but the API accepts it.
+  forms:
+  - kind: bearer-token
+    location: Authorization header
+  - kind: api-key
+    location: X-Api-Key header
+  - kind: api-key
+    location: api_key query parameter
+    caution: credential in URL
 transport: https-required
+key_management:
+  create: https://theorg.com/subscription#api
+  rotation_policy: null
+  expiry: null
+  note: >-
+    Keys are created and named from the subscription page. The Org publishes no key
+    rotation policy, expiry, or scoping model for API keys — a key is account-scoped
+    and carries full account privileges ("Your API keys carry many privileges, so be
+    sure to keep them secure!").
+x-evidence:
+  fetched: '2026-08-14'
+  probes:
+  - url: https://api.theorg.com/v1.1/mcp
+    method: POST
+    http_status: 401
+    note: unauthenticated tools/list returns the Bearer challenge
+  - url: https://api.theorg.com/.well-known/oauth-authorization-server
+    http_status: 200
+  - url: https://api.theorg.com/.well-known/oauth-protected-resource
+    http_status: 200

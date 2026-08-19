@@ -1,4 +1,4 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 source: https://developers.theorg.com/api/change-log
 versioning:
@@ -6,22 +6,65 @@ versioning:
   current:
     org_chart: v1.2
     positions: v1.1
+    lists: v1.1
     usage: v1.1
     mcp: v1.1
   docs: https://developers.theorg.com/api/key-concepts
   note: >
-    Endpoints version independently in the URI path. The org-chart endpoint advanced
-    to v1.2 (2026-03-11) while other endpoints remain on v1.1.
+    Endpoints version independently in the URI path. The org-chart endpoint advanced to v1.2
+    (2026-03-11) while other endpoints remain on v1.1; the Lists API is documented as
+    reachable on both v1.1 and v1.2. MCP tools are NOT versioned at all — they change in
+    place under the same endpoint.
 changelog: https://developers.theorg.com/api/change-log
+changelog_artifact: changelog/theorg-changelog.yml
 deprecation:
   policy_url: null
   sunset_header: false
+  deprecation_header: false
+  advance_notice: none
   note: >
-    No formal deprecation policy or RFC 8594 Sunset/Deprecation header support is
-    published. The v1.2 org-chart release did remove fields (linkedinUrl, workEmail)
-    and the unplaced section from responses — a breaking change communicated via the
-    changelog rather than header signaling.
-status_page: null
+    No formal deprecation policy and no RFC 8594 Sunset/Deprecation header support is
+    published. Breaking changes ship the day they are announced, with no notice window and
+    no machine-readable signal.
+breaking_changes_observed:
+- date: '2026-03-11'
+  surface: 'GET /v1.2/companies/org-chart'
+  change: >-
+    Removed linkedinUrl and workEmail from node responses; removed the unplaced section;
+    narrowed the section parameter to orgChart|board.
+  mitigation: New URI version (v1.2) — v1.1 callers were not broken in place.
+- date: '2026-08-13'
+  surface: 'MCP tool get_org_chart'
+  change: >-
+    Return type changed from org-chart JSON to a signed iframe embed URL; the tool also
+    became free.
+  mitigation: >-
+    NONE. The tool name was reused, the endpoint version did not change, and there is no
+    tool-level version an agent can pin. Any agent parsing the previous payload broke
+    silently on the release date. This is the clearest lifecycle risk on the provider's
+    fastest-moving surface — the agent surface is where all 2026 H2 change is happening and
+    it is the surface with no versioning at all.
+deprecated_operations: []
+status_page:
+  url: null
+  probed:
+  - {url: 'https://status.theorg.com', result: DNS does not resolve}
+  note: >-
+    The Org publishes no status page. status.theorg.com does not resolve, and no status,
+    uptime or incident-history link appears anywhere in the developer portal or the site
+    footer. There is no way for a consumer to distinguish an outage from their own bug, so
+    NO `StatusPage` pointer is emitted in apis.yml.
 sla:
   url: null
-deprecated_operations: []
+  uptime_target: null
+  note: No SLA or uptime commitment is published on any plan, including Enterprise.
+support:
+  help_center: https://support.theorg.com/en/
+  contact: https://theorg.com/contact
+data_delivery_lifecycle:
+  flat_files:
+    cadence: monthly
+    note: >-
+      Bulk SFTP snapshots are published at the start of each month into dated folders
+      (e.g. global/2026-07-01/) with a _SUCCESS completion marker.
+    docs: https://developers.theorg.com/flat-files

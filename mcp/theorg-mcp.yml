@@ -1,35 +1,149 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 status: published
 source: https://developers.theorg.com/api/endpoints/mcp-api
+docs:
+- https://developers.theorg.com/mcp
+- https://developers.theorg.com/mcp/get-started
+- https://developers.theorg.com/api/endpoints/mcp-api
 server:
   name: theorg
-  transport: http          # Streamable HTTP (each JSON-RPC message is a separate POST)
+  transport: streamable-http
   url: https://api.theorg.com/v1.1/mcp
   protocol: json-rpc-2.0
+  protocol_versions: ['2025-11-25', '2025-03-26']
+  protocol_version_header: MCP-Protocol-Version
   auth:
     type: apiKey
     in: header
     name: X-Api-Key
-notes: >
-  The Org exposes an official MCP endpoint over Streamable HTTP. Clients follow the
-  standard JSON-RPC 2.0 handshake (initialize -> initialized notification -> tools/list
-  / tools/call). Authenticated with the same X-Api-Key header as the REST API; tool
-  calls consume the same account credits as the equivalent REST endpoints.
+  auth_alternatives:
+  - type: oauth2
+    flow: authorizationCode
+    pkce: S256
+    scope: mcp
+    metadata: https://api.theorg.com/.well-known/oauth-protected-resource
+deployment:
+  mode: remote
+  endpoint: https://api.theorg.com/v1.1/mcp
+  auth: api-key
+  auth_note: >-
+    An OAuth 2.1 authorization server also protects this endpoint (scope `mcp`, dynamic
+    client registration) and is advertised in the 401 WWW-Authenticate challenge, but the
+    provider documents only the X-Api-Key header, so api-key is the supported path.
+  verified: probed
+  probe:
+    url: https://api.theorg.com/v1.1/mcp
+    method: POST
+    body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+    http_status: 401
+    www_authenticate: 'Bearer realm="mcp",resource_metadata="https://api.theorg.com/.well-known/oauth-protected-resource/v1.1/mcp",scope=mcp'
+    response: '{"error":{"code":401,"reason":"Missing credentials. Provide Authorization: Bearer, X-Api-Key, or the api_key query parameter."}}'
+    server_header: akka-http/10.2.10
+  checked: '2026-08-14'
+client_configuration:
+  note: >-
+    Verbatim from https://developers.theorg.com/mcp/get-started. Cursor connects to the
+    remote endpoint natively; Claude Desktop bridges to it through the third-party
+    `mcp-remote` npm package. `mcp-remote` is a generic community bridge, NOT a
+    first-party The Org stdio server — the deployment mode is remote, not both.
+  cursor:
+    type: streamableHttp
+    url: https://api.theorg.com/v1.1/mcp
+    headers:
+      X-Api-Key: YOUR_API_KEY
+  claude_desktop:
+    command: npx
+    args: ['-y', 'mcp-remote', 'https://api.theorg.com/v1.1/mcp', '--header', 'X-Api-Key:${THEORG_API_KEY}']
+  api_key_source: https://theorg.com/subscription#api
+tools_introspection:
+  method: gated
+  note: >-
+    Live `tools/list` requires credentials (401 unauthenticated), so the tool list below
+    is transcribed from the provider's published MCP tool catalog rather than from live
+    introspection. Names, descriptions, limits and credit costs are provider-published;
+    per-tool JSON Schema inputSchema/outputSchema require an authenticated tools/list.
+    The 2026-08-13 changelog states MCP tools now include a JSON Schema `outputSchema`.
 tools:
-  - name: get_org_chart
-    description: Full org chart by domain or LinkedIn URL.
-    cost: 10 credits per request
-    source_operation: GET /v1.2/companies/org-chart
-  - name: get_manager
-    description: Manager of a person (by email or LinkedIn URL).
-    cost: 1 credit per find
-    source_operation: GET /v1.1/companies/org-chart/managers
-  - name: get_usage
-    description: Current account usage / remaining credits.
-    cost: free
-    source_operation: GET /v1.1/usage
-  - name: find_positions
-    description: Search positions with filters.
-    cost: 1 credit per returned row
-    source_operation: POST /v1.1/positions
+- name: search_companies
+  description: Look up companies by name, domain, email, or LinkedIn company URL/slug.
+  cost: free
+  rest_equivalent: null
+- name: get_company
+  description: 'Get a company profile: description, size, location, industries, funding.'
+  cost: free
+  rest_equivalent: null
+- name: get_org_chart
+  description: Get an iframe embed URL for a company's org chart.
+  cost: free
+  rest_equivalent: GET /v1.2/companies/org-chart
+  note: >-
+    Diverged from REST on 2026-08-13 — the tool now returns a signed iframe embed URL
+    (/embeds/org-chart/{signature}) and is free, while the REST endpoint returns
+    ChartNode JSON and costs 10 credits.
+- name: find_person
+  description: Look up a specific person by LinkedIn URL/slug, or by full name + company name/domain.
+  cost: free
+  rest_equivalent: null
+- name: find_jobs
+  description: Search open job vacancies by job URL/slug, title, company, or filters.
+  cost: free
+  limits: max 25 results per call
+  rest_equivalent: null
+- name: get_manager
+  description: Find the manager of a person.
+  cost: 1 credit per find
+  rest_equivalent: GET /v1.1/companies/org-chart/managers
+  note: Also accepts positionId since 2026-08-13.
+- name: get_reports
+  description: Find the direct reports of a person.
+  cost: 1 credit when found
+  limits: max 50 returned
+  rest_equivalent: null
+- name: find_positions
+  description: Search positions/people with filters.
+  cost: 1 credit per returned row
+  limits: max 25 results per call
+  rest_equivalent: POST /v1.1/positions
+  note: >-
+    The REST endpoint allows limit up to 1000 and offset up to 10000; the MCP tool caps
+    a call at 25 rows.
+- name: resolve_contacts
+  description: Resolve work emails for up to 25 people.
+  cost: 1 credit per person newly resolved
+  limits: max 25 people per call
+  rest_equivalent: null
+  note: Re-resolving a contact the account already paid for is free.
+- name: get_lists
+  description: List people/lead lists for your account.
+  cost: free
+  rest_equivalent: GET /v1.1/lists
+- name: add_to_list
+  description: Add people to an existing list.
+  cost: free
+  limits: max 25 IDs per call
+  rest_equivalent: null
+- name: create_list
+  description: Create a people/lead list and optionally add position IDs.
+  cost: free
+  limits: max 25 IDs per call
+  rest_equivalent: null
+- name: get_usage
+  description: Check your remaining API credits and usage.
+  cost: free
+  rest_equivalent: GET /v1.1/usage
+credits:
+  note: >-
+    "Credits are deducted from the same balance as your API usage. List tools do not
+    consume credits. Re-resolving a contact your account has already paid for is free."
+  source: https://developers.theorg.com/mcp
+notes: >-
+  The Org exposes an official remote MCP server over Streamable HTTP (each JSON-RPC
+  message is a separate POST; GET/SSE streaming is unsupported). Clients follow the
+  standard handshake (initialize -> notifications/initialized -> tools/list / tools/call).
+  The tool surface grew from 4 tools at the 2026-07-21 pass to 13 across four releases
+  (2026-07-22, 2026-07-23, and two on 2026-08-13), and is now materially WIDER than the
+  REST API: only 5 of 13 tools have a documented REST equivalent. MCP is the primary
+  surface for company search, person lookup, jobs, reports and contact resolution — none
+  of which the REST API exposes.
+crosswalk: mcp/theorg-tool-crosswalk.yml

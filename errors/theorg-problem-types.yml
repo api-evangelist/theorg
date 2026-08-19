@@ -1,4 +1,4 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 source: https://developers.theorg.com/api/key-concepts
 format: custom-json
@@ -11,23 +11,61 @@ envelope:
         "reason": "<error description>"
       }
     }
-  note: >
-    The Org does not use RFC 9457 application/problem+json. Errors are returned as a
-    JSON object with a single `error` member carrying the HTTP status `code` and a
-    human-readable `reason`.
+  note: >-
+    The Org does not use RFC 9457 application/problem+json. Errors are returned as a JSON
+    object with a single `error` member carrying the HTTP status `code` and a human-readable
+    `reason`. There is no machine-readable error type, no application-level error code
+    distinct from the HTTP status, and no field-level validation detail — which means two
+    different 400s are distinguishable only by parsing English prose out of `reason`.
+documented_status_codes: [200, 400, 401, 402, 404, 429, 500, 503, 504]
 problems:
-  - status: 401
-    reason: Missing or invalid API key.
-    remediation: Supply a valid X-Api-Key header for the account.
-  - status: 402
-    reason: Insufficient credits for the requested operation.
-    remediation: >
-      Check remaining credits at GET /v1.1/usage, or estimate cost first with
-      POST /v1.1/positions/credit-usage.
-  - status: 429
-    reason: Too Many Requests — exceeded 15 requests/second for the endpoint.
-    remediation: Back off and retry; the rate limit is per endpoint across the account's keys.
-notes: >
-  Documented status semantics harvested from the key-concepts page. 401/402 are inferred
-  from the api-key + credit model The Org documents; 429 is documented verbatim. No full
-  error-code registry is published by the provider.
+- status: 400
+  reason: Bad Request — malformed or invalid request parameters.
+  remediation: >-
+    Check required parameters. POST /v1.1/positions requires both limit (max 1000) and
+    offset (max 10000); locations filters require country.
+- status: 401
+  reason: >-
+    Missing or invalid credentials. Observed verbatim on the MCP endpoint: "Missing
+    credentials. Provide Authorization: Bearer, X-Api-Key, or the api_key query parameter."
+  remediation: Supply a valid X-Api-Key header for the account.
+  observed: true
+  observed_at: 'POST https://api.theorg.com/v1.1/mcp (2026-08-14)'
+- status: 402
+  reason: Payment Required — insufficient credits for the requested operation.
+  remediation: >-
+    Check remaining credits at GET /v1.1/usage, or estimate cost first with
+    POST /v1.1/positions/credit-usage.
+- status: 404
+  reason: 'Not found. Observed verbatim: {"error":{"code":404,"reason":"Not found"}}'
+  remediation: Verify the path and API version; the requested company/person may not be indexed.
+  observed: true
+  observed_at: 'GET https://api.theorg.com/openapi.json (2026-08-14)'
+- status: 429
+  reason: Too Many Requests — exceeded 15 requests/second for the endpoint.
+  remediation: >-
+    Back off and retry; the rate limit is per endpoint across the account's keys. No
+    Retry-After header is returned, so the backoff interval must be chosen by the client.
+- status: 500
+  reason: Internal Server Error.
+  remediation: Retry with backoff; reads are safe to retry, and a replay within 24h costs no credits.
+- status: 503
+  reason: Service Unavailable.
+  remediation: Retry with backoff.
+- status: 504
+  reason: Gateway Timeout.
+  remediation: >-
+    Retry with backoff; consider narrowing the positions filter or reducing limit, since
+    large result sets are the likely trigger.
+error_code_registry:
+  published: false
+  note: >-
+    The Org publishes no error-code registry — no named codes, no per-endpoint error tables,
+    and no remediation reference. The status list above is the complete published error
+    contract. 401/404 bodies are quoted from live probes; the remaining reasons and
+    remediations are derived from the documented status list plus the documented credit and
+    rate-limit semantics, not invented failure modes.
+notes: >-
+  Upgraded from the 2026-07-21 pass, which recorded only 401/402/429. The key-concepts page
+  enumerates the full set of status codes the API returns, and live probes of api.theorg.com
+  confirmed the envelope shape verbatim on two of them.

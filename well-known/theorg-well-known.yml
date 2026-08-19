@@ -1,0 +1,107 @@
+generated: '2026-08-14'
+method: probed
+source: live GET of /.well-known/* on every host in apis.yml (api.theorg.com, developers.theorg.com, theorg.com)
+hosts_probed:
+- https://api.theorg.com
+- https://developers.theorg.com
+- https://theorg.com
+documents:
+- host: api.theorg.com
+  path: /.well-known/oauth-authorization-server
+  status: 200
+  content_type: application/json
+  spec: RFC 8414 OAuth 2.0 Authorization Server Metadata
+  file: theorg-oauth-authorization-server.json
+- host: api.theorg.com
+  path: /.well-known/oauth-protected-resource
+  status: 200
+  content_type: application/json
+  spec: RFC 9728 OAuth 2.0 Protected Resource Metadata
+  file: theorg-oauth-protected-resource.json
+- host: api.theorg.com
+  path: /.well-known/oauth-protected-resource/v1.1/mcp
+  status: 200
+  content_type: application/json
+  spec: RFC 9728 per-resource metadata, advertised by the MCP WWW-Authenticate challenge
+  file: theorg-oauth-protected-resource.json
+  note: >-
+    Returns a body byte-identical to the root /.well-known/oauth-protected-resource
+    document, so it is indexed here rather than saved a second time.
+- host: api.theorg.com
+  path: /.well-known/security.txt
+  status: 404
+- host: api.theorg.com
+  path: /.well-known/openid-configuration
+  status: 404
+- host: api.theorg.com
+  path: /.well-known/api-catalog
+  status: 404
+- host: api.theorg.com
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: api.theorg.com
+  path: /.well-known/agent-card.json
+  status: 404
+- host: api.theorg.com
+  path: /.well-known/agent.json
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/security.txt
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/openid-configuration
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/oauth-authorization-server
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/oauth-protected-resource
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/api-catalog
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/agent-card.json
+  status: 404
+- host: developers.theorg.com
+  path: /.well-known/agent.json
+  status: 404
+- host: theorg.com
+  path: /.well-known/security.txt
+  status: 404
+- host: theorg.com
+  path: /.well-known/openid-configuration
+  status: 404
+- host: theorg.com
+  path: /.well-known/oauth-authorization-server
+  status: 404
+- host: theorg.com
+  path: /.well-known/oauth-protected-resource
+  status: 404
+- host: theorg.com
+  path: /.well-known/api-catalog
+  status: 404
+- host: theorg.com
+  path: /.well-known/ai-plugin.json
+  status: 404
+- host: theorg.com
+  path: /.well-known/agent-card.json
+  status: 404
+- host: theorg.com
+  path: /.well-known/agent.json
+  status: 404
+summary:
+  paths_probed: 27
+  documents_served: 3
+  hosts_serving: 1
+notes: >-
+  api.theorg.com serves a real RFC 8414 authorization-server metadata document and a
+  real RFC 9728 protected-resource metadata document. These are new since the 2026-07-21
+  pass, and they are the discovery layer for OAuth 2.1 authorization of the MCP endpoint
+  at https://api.theorg.com/v1.1/mcp. No security.txt, OIDC discovery, api-catalog,
+  ai-plugin or A2A agent card is served on any host. developers.theorg.com and theorg.com
+  answer every /.well-known/* path with an HTML 404 page (a genuine 404 status, not a
+  soft-200 catch-all), so neither contributes a document.

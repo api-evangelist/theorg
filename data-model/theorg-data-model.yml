@@ -1,8 +1,15 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: derived
 source: >
-  https://developers.theorg.com/api/data-models/{company,location,org-chart,position}
-  and endpoint reference pages
+  https://developers.theorg.com/api/data-models/{company,location,org-chart,position},
+  the endpoint reference pages (company, position, lists, usage), the MCP tool catalog at
+  https://developers.theorg.com/mcp, and the flat-file schema at
+  https://developers.theorg.com/flat-files
+derivation_note: >-
+  Derived from the provider's published data-model and endpoint reference pages, NOT from a
+  spec — The Org publishes no OpenAPI, so there are no $ref links or operationIds to walk.
+  Field lists are transcribed from documentation; entities marked mcp_only are named in the
+  MCP tool catalog and their fields are only partially documented.
 entities:
   - name: Company
     description: An organization with a public org chart on The Org.
@@ -58,6 +65,45 @@ entities:
       - positionId
       - fullName
       - title
+  - name: List
+    description: >
+      A people/lead list owned by or shared with an account seat. Added 2026-07-23 with the
+      Lists API and the get_lists/create_list/add_to_list MCP tools.
+    source: https://developers.theorg.com/api/endpoints/lists-api
+    fields:
+      - id
+      - name
+      - slug
+      - url
+      - positionCount
+  - name: Usage
+    description: Credit consumption and balance for the account's billing period.
+    source: https://developers.theorg.com/api/endpoints/usage-api
+    fields:
+      - resetDate
+      - unlimited
+      - monthlyCredits
+      - credits
+      - creditOverages
+  - name: UsageHistory
+    description: Per-API daily or monthly usage series.
+    source: https://developers.theorg.com/api/endpoints/usage-api
+    fields:
+      - api
+      - stats
+    enum:
+      api: [prospecting_api, manager_api, org_chart_api]
+  - name: Job
+    description: >
+      An open job vacancy. Reachable only through the find_jobs MCP tool (added 2026-08-13)
+      and as a job-post line type in the flat-file dumps; no REST endpoint exposes it.
+    mcp_only: true
+    source: https://developers.theorg.com/mcp
+    fields:
+      - jobPostUrl
+      - title
+      - company
+    fields_note: Field list is partial — The Org publishes no data-model page for jobs.
 relationships:
   - from: Position
     to: Company
@@ -93,3 +139,25 @@ relationships:
     to: ChartNode
     kind: has_many
     via: org-chart
+  - from: List
+    to: Position
+    kind: has_many
+    via: positionCount
+    note: >-
+      Lists contain positions; the Lists API returns only the count, and membership is
+      mutated exclusively through the create_list / add_to_list MCP tools.
+  - from: Job
+    to: Company
+    kind: belongs_to
+    via: company
+  - from: UsageHistory
+    to: Usage
+    kind: belongs_to
+    via: account
+id_conventions:
+  list_id: UUID
+  list_url: https://theorg.com/people/lists/{slug}
+  embed_url: /embeds/org-chart/{signature}
+  embed_note: >-
+    Since 2026-08-13 all org-chart embed URLs use a signed-signature path rather than a
+    plain identifier.

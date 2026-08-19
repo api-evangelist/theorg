@@ -1,27 +1,83 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 source: https://developers.theorg.com/api/change-log
 scheme: dated + semver-per-endpoint
 current_version:
   org_chart: v1.2.0
+  positions: v1.1
+  lists: v1.1
+  usage: v1.1
+  mcp: v1.1
+cadence_note: >-
+  Release velocity increased sharply in the second half of 2026 — five releases between
+  2026-07-22 and 2026-08-13, all on the MCP/agent surface, after a five-month gap since the
+  v1.2.0 org-chart release in March. The Org is developing its agent surface far faster than
+  its REST surface.
 entries:
-  - version: Org Chart v1.2.0
-    date: '2026-03-11'
-    breaking: true
-    highlights:
-      - No unplaced section — endpoint no longer returns unplaced nodes.
-      - Section parameter accepts `orgChart` or `board`.
-      - Leaner nodes — `linkedinUrl` and `workEmail` removed from responses.
-  - version: MCP Integration
-    date: '2026-02-24'
-    breaking: false
-    highlights:
-      - Added Model Context Protocol support with new documentation.
-      - New MCP endpoint over Streamable HTTP at POST https://api.theorg.com/v1.1/mcp.
-      - Tools available — get_org_chart, get_manager, get_usage, find_positions.
-  - version: Org Chart v1.1.0
-    date: '2025-10-27'
-    breaking: false
-    highlights:
-      - Endpoint now returns all associated nodes including unplaced positions.
-      - Added a `section` parameter to filter results — `orgChart`, `board`, or `unplaced`.
+- version: MCP person, company LinkedIn, and job lookup tools
+  date: '2026-08-13'
+  breaking: false
+  additions: [find_person, find_jobs]
+  highlights:
+  - find_person — resolve a specific person from The Org's people index by LinkedIn profile URL/slug.
+  - find_jobs — search open job vacancies, max 25 results per call.
+  - search_companies now accepts LinkedIn URLs.
+  - Company and person LinkedIn arguments accept bare slugs as well as full URLs.
+- version: MCP contact, company, and reporting-line tools
+  date: '2026-08-13'
+  breaking: true
+  additions: [resolve_contacts, get_company, get_reports]
+  highlights:
+  - resolve_contacts — actively resolve work emails for up to 25 people.
+  - get_company — enriched company profile by multiple identifiers, free.
+  - get_reports — direct reports of a person, max 50 returned.
+  - 'BREAKING: get_org_chart now returns an iframe embed URL instead of JSON, and is now free.'
+  - All embed URLs use the signed format /embeds/org-chart/{signature}.
+  - MCP tools now include a JSON Schema outputSchema.
+  breaking_note: >-
+    get_org_chart changed its return type from org-chart JSON to an embed URL. Any agent
+    parsing the previous payload breaks. Announced in the changelog only — no Sunset or
+    Deprecation header, no version bump on the tool, and the tool name was reused.
+- version: Lists API and MCP people/lead list tools
+  date: '2026-07-23'
+  breaking: false
+  additions: ['GET /v1.1/lists', get_lists, create_list, add_to_list]
+  highlights:
+  - 'New REST endpoint — GET https://api.theorg.com/v1.1/lists.'
+  - get_lists — list owned and shared lists.
+  - create_list — create a list with up to 25 positions.
+  - add_to_list — add up to 25 positions to an existing list.
+- version: MCP tools expanded
+  date: '2026-07-22'
+  breaking: false
+  additions: [search_companies]
+  highlights:
+  - Added search_companies and expanded find_positions documentation in the MCP catalog.
+- version: Org Chart v1.2.0
+  date: '2026-03-11'
+  breaking: true
+  highlights:
+  - No unplaced section — endpoint no longer returns unplaced nodes.
+  - Section parameter accepts `orgChart` or `board`.
+  - Leaner nodes — `linkedinUrl` and `workEmail` removed from responses.
+- version: MCP Integration
+  date: '2026-02-24'
+  breaking: false
+  highlights:
+  - Added Model Context Protocol support with new documentation.
+  - New MCP endpoint over Streamable HTTP at POST https://api.theorg.com/v1.1/mcp.
+  - Tools available — get_org_chart, get_manager, get_usage, find_positions.
+- version: Org Chart v1.1.0
+  date: '2025-10-27'
+  breaking: false
+  highlights:
+  - Endpoint now returns all associated nodes including unplaced positions.
+  - Added a `section` parameter to filter results — `orgChart`, `board`, or `unplaced`.
+undocumented_changes:
+  note: >-
+    Not every shipped change reaches the changelog. The OAuth 2.1 authorization server now
+    protecting the MCP endpoint (RFC 8414 + RFC 9728 metadata at api.theorg.com, dynamic
+    client registration, scope `mcp`) appears in NO changelog entry and in no documentation
+    page, but is live and observable — see well-known/theorg-well-known.yml. The
+    GET /v1.1/usage/history operation is likewise documented in the reference but never
+    announced.

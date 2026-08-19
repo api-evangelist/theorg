@@ -1,0 +1,97 @@
+generated: '2026-08-14'
+method: searched
+source: https://theorg.com/pricing
+currency: USD
+billing_note: >-
+  Pricing is published per seat and billed yearly; the monthly figure shown on the page is
+  the yearly price divided across twelve months, not a month-to-month rate. Prices exclude
+  tax. Credit allowances are the same balance the API and MCP endpoints draw from.
+plan_count: 4
+plans:
+- name: Free
+  price: 0
+  currency: USD
+  billing_period: yearly
+  price_display: $0 per seat/month
+  seats: 1 per account
+  included_credits: 10
+  credit_period: per seat/month
+  overage: 0.05
+  overage_unit: USD per additional credit
+  features:
+  - Limited organization views
+  note: Free forever.
+- name: Basic
+  price: 232
+  currency: USD
+  billing_period: yearly
+  price_display: $19.33 per seat/month ($232 per seat billed yearly + tax)
+  seats: 1 per account
+  included_credits: 12000
+  credit_period: per seat/year
+  overage: 0.04
+  overage_unit: USD per additional credit
+  features:
+  - Unlimited organization views
+  - Advanced people filtering
+  - Advanced jobs filtering
+  trial: true
+- name: Premium
+  price: 392
+  currency: USD
+  billing_period: yearly
+  price_display: $32.67 per seat/month ($392 per seat billed yearly + tax)
+  seats: 1-10 per account
+  included_credits: 24000
+  credit_period: per seat/year
+  overage: 0.03
+  overage_unit: USD per additional credit
+  features:
+  - Unlimited organization views
+  - Advanced people filtering
+  - Advanced jobs filtering
+  - Export contacts (CSV / CRM)
+  - Collaboration features
+  trial: true
+- name: Enterprise
+  price: null
+  currency: USD
+  billing_period: yearly
+  price_display: Custom pricing — contact sales
+  seats: 10+ per account
+  included_credits: 48000
+  credit_period: per seat/year
+  overage: 0.02
+  overage_unit: USD per additional credit
+  features:
+  - Unlimited organization views
+  - Advanced people filtering
+  - Advanced jobs filtering
+  - Export contacts (CSV / CRM)
+  - Collaboration features
+  - Research requests
+  - Account management
+  commitment: Minimum 12 month commitment
+  contact_sales: true
+api_access_note: >-
+  The Org does not sell a separate API plan. API and MCP usage draw down the same seat
+  credit balance as the product, so the pricing table above IS the API price list. The
+  developer key-concepts page documents a baseline of 100 API credits per month for
+  accounts (Enterprise may differ), which does not reconcile with the per-seat annual
+  allowances published on the pricing page — the two surfaces state credit entitlements
+  differently and the provider does not explain the relationship.
+credit_costs:
+  note: Per-endpoint credit consumption, from https://developers.theorg.com/api/key-concepts
+  companies_org_chart: 10 credits per request
+  companies_org_chart_managers: 1 credit per find
+  positions: 1 credit per returned row
+  lists: free
+  usage: free
+  positions_credit_usage: free
+  replay: >-
+    Requests can be replayed any number of times within 24 hours of the initial request at
+    no additional cost.
+x-evidence:
+  fetched: '2026-08-14'
+  url: https://theorg.com/pricing
+  http_status: 200

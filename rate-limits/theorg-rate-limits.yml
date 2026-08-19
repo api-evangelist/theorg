@@ -1,25 +1,87 @@
-generated: '2026-07-21'
+generated: '2026-08-14'
 method: searched
 source: https://developers.theorg.com/api/key-concepts
 rate_limits:
-  - scope: per-endpoint
-    limit_count: 15
-    interval: second
-    applies_to: each endpoint, aggregated across all API keys within an account
-    exceeded_status: 429
-    exceeded_reason: Too Many Requests
+- scope: per-endpoint
+  limit_count: 15
+  interval: second
+  window: 1s
+  burst: null
+  applies_to: each endpoint, aggregated across all API keys within an account
+  exceeded_status: 429
+  exceeded_reason: Too Many Requests
+  response_headers: []
+  quote: >-
+    "You can make 15 requests per second to a single endpoint of our API across API keys
+    within an account."
+limit_count: 1
+response_header_signal:
+  present: false
+  headers_documented: []
+  retry_after: false
+  note: >-
+    No RateLimit-*, X-RateLimit-* or Retry-After header is documented, and none was observed
+    on the live 401/404 responses probed on api.theorg.com. The only runtime signal is the
+    429 itself. Agents cannot read remaining quota or a reset time from a response, and must
+    back off blindly. The credit balance IS queryable, but only by spending a separate call
+    to GET /v1.1/usage — it is not carried on responses.
 credit_model:
-  monthly_credits: 100
-  free_account_monthly_credits: 10
-  max_additional_credits_monthly: 240000
+  note: >-
+    A second, independent limit sits alongside the request rate: a credit allowance drawn
+    down per operation and shared between the REST API and the MCP endpoint.
+  documented_monthly_credits: 100
+  documented_monthly_credits_note: >-
+    "All accounts have 100 API credits per month" per the key-concepts page (Enterprise
+    accounts may differ). This does not reconcile with the per-seat annual allowances on
+    https://theorg.com/pricing (Free 10/seat/month, Basic 12,000/seat/year, Premium
+    24,000/seat/year, Enterprise 48,000/seat/year); the provider states credit entitlements
+    differently on the two surfaces and does not explain the relationship.
+  plans: plans/theorg-plans-pricing.yml
+  exhausted_status: 402
   per_endpoint_cost:
-    "/companies/org-chart": 10 credits per request
-    "/companies/org-chart/managers": 1 credit per successful find
-    "/positions": 1 credit per returned row
-    "/usage": free
-    "/positions/credit-usage": free
-  replay: Requests may be replayed any number of times within 24h of the initial request at no additional cost.
-notes: >
-  The Org enforces both a request-rate limit (15 req/s per endpoint) and a monthly
-  credit allowance. Credit cost varies by endpoint; the free credit-usage endpoint
-  estimates cost before spending.
+    'GET /v1.2/companies/org-chart': 10 credits per request
+    'GET /v1.1/companies/org-chart/managers': 1 credit per successful find
+    'POST /v1.1/positions': 1 credit per returned row
+    'POST /v1.1/positions/credit-usage': free
+    'GET /v1.1/lists': free
+    'GET /v1.1/usage': free
+    'GET /v1.1/usage/history': free
+  mcp_tool_cost:
+    get_manager: 1 credit per find
+    get_reports: 1 credit when found
+    find_positions: 1 credit per returned row
+    resolve_contacts: 1 credit per person newly resolved
+    search_companies: free
+    get_company: free
+    get_org_chart: free
+    find_person: free
+    find_jobs: free
+    get_lists: free
+    add_to_list: free
+    create_list: free
+    get_usage: free
+    note: >-
+      "Credits are deducted from the same balance as your API usage. List tools do not
+      consume credits." get_org_chart became free on 2026-08-13 when it switched to
+      returning an embed URL — the same capability still costs 10 credits over REST.
+  replay: >-
+    Requests may be replayed any number of times within 24h of the initial request at no
+    additional cost; a specific position row can be re-returned free within 24h of first
+    return; re-resolving an already-paid contact is free.
+  estimation: >-
+    POST /v1.1/positions/credit-usage returns creditCost and remainingCredits for a query
+    before it is run, at no cost. There is no MCP tool equivalent, so an agent cannot price
+    a query before spending on it.
+mcp_call_caps:
+  note: Hard per-call result caps on the agent surface, separate from the rate limit.
+  find_positions: 25 rows per call
+  find_jobs: 25 results per call
+  get_reports: 50 returned
+  resolve_contacts: 25 people per call
+  add_to_list: 25 IDs per call
+  create_list: 25 IDs per call
+notes: >-
+  The Org enforces three distinct throttles: a 15 req/s per-endpoint request rate, a credit
+  allowance metered per operation, and per-call result caps on MCP tools. Only the first
+  produces an HTTP status a client can react to (429); the second surfaces as 402 once
+  exhausted; the third is silent truncation.

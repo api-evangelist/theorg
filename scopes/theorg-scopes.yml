@@ -1,0 +1,57 @@
+generated: '2026-08-14'
+method: probed
+source: https://api.theorg.com/.well-known/oauth-authorization-server
+docs: null
+docs_note: >-
+  The Org publishes no scopes / permissions reference page. developers.theorg.com/api/key-concepts
+  documents API-key authentication only and does not mention OAuth at all — the OAuth surface
+  below was read from the live RFC 8414 / RFC 9728 metadata documents the API host serves,
+  not from documentation.
+schemes:
+- name: OAuth2
+  source: https://api.theorg.com/.well-known/oauth-authorization-server
+  issuer: https://api.theorg.com
+  flows:
+  - flow: authorizationCode
+    authorizationUrl: https://api.theorg.com/oauth/authorize
+    tokenUrl: https://api.theorg.com/oauth/token
+    pkce_methods: [S256]
+    token_endpoint_auth_methods: [none]
+    note: >-
+      Public-client authorization code + PKCE, the OAuth 2.1 profile the MCP
+      authorization spec requires. No client secret is used.
+  registration_endpoint: https://api.theorg.com/oauth/register
+  dynamic_client_registration: true
+  client_id_metadata_document_supported: true
+scopes:
+- scope: mcp
+  description: >-
+    Access to The Org's Model Context Protocol endpoint at https://api.theorg.com/v1.1/mcp
+    and the tools it exposes. This is the only scope the authorization server advertises;
+    The Org has not decomposed MCP access into per-tool or read/write scopes.
+  flows: [authorizationCode]
+  sources:
+  - https://api.theorg.com/.well-known/oauth-authorization-server
+  - https://api.theorg.com/.well-known/oauth-protected-resource
+  - 'WWW-Authenticate challenge on POST https://api.theorg.com/v1.1/mcp (scope=mcp)'
+protected_resources:
+- resource: https://api.theorg.com/v1.1/mcp
+  authorization_servers: [https://api.theorg.com]
+  scopes_supported: [mcp]
+  bearer_methods_supported: [header]
+  resource_documentation: https://developers.theorg.com/api
+x-evidence:
+  fetched: '2026-08-14'
+  probes:
+  - url: https://api.theorg.com/.well-known/oauth-authorization-server
+    http_status: 200
+  - url: https://api.theorg.com/.well-known/oauth-protected-resource
+    http_status: 200
+  - url: https://api.theorg.com/v1.1/mcp
+    http_status: 401
+    www_authenticate: 'Bearer realm="mcp",resource_metadata="https://api.theorg.com/.well-known/oauth-protected-resource/v1.1/mcp",scope=mcp'
+notes: >-
+  Scope coverage is deliberately coarse: a single `mcp` scope gates the whole agent
+  surface. The REST API (companies, positions, lists, usage) is not an OAuth protected
+  resource — it remains X-Api-Key only — so OAuth here authorizes agents, not the
+  general API.

@@ -1,0 +1,59 @@
+generated: '2026-08-14'
+method: searched
+source: >-
+  Registry queries against npm, PyPI, RubyGems and crates.io, plus a full read of
+  https://developers.theorg.com/api and its endpoint/integration pages.
+package_count: 0
+official_package_count: 0
+packages: []
+registries_checked:
+- registry: npm
+  queries:
+  - {query: 'search text=theorg', result: '0 objects'}
+  - {query: 'search text=theorg.com', result: '0 objects'}
+  - {package: theorg, status: 404}
+  - {package: '@theorg/sdk', status: 404}
+  - {package: '@theorg/api', status: 404}
+  - {package: '@theorg/mcp', status: 404}
+  - {package: theorg-sdk, status: 404}
+  - {package: theorg-api, status: 404}
+  - {package: theorg-mcp, status: 404}
+- registry: pypi
+  queries:
+  - {package: theorg, status: 404}
+  - {package: theorg-api, status: 404}
+  - {package: theorg-sdk, status: 404}
+- registry: rubygems
+  queries:
+  - {package: theorg, status: 404}
+- registry: crates.io
+  queries:
+  - {package: theorg, status: 403, note: 'crates.io rejects the unauthenticated agent; no crate of this name is referenced in any provider doc'}
+- registry: docs
+  queries:
+  - {url: 'https://developers.theorg.com/api', result: 'no SDK, client library or CLI section exists in the developer portal navigation'}
+third_party_dependencies:
+- name: mcp-remote
+  registry: npm
+  official: false
+  version: null
+  published: null
+  role: >-
+    The Org's own MCP setup guide instructs Claude Desktop users to run
+    `npx -y mcp-remote https://api.theorg.com/v1.1/mcp --header X-Api-Key:...`.
+    mcp-remote is a generic third-party stdio-to-HTTP bridge maintained by the wider MCP
+    community, not by The Org. It is recorded here because the provider's documentation
+    depends on it, NOT as a The Org package — it is deliberately excluded from
+    package_count and carries no version/published lookup, because pinning a version to it
+    would misattribute a community package to this provider.
+  source: https://developers.theorg.com/mcp/get-started
+notes: >-
+  The Org ships NO first-party client libraries in any language. This is an honest zero,
+  verified against six registries and the full developer portal, not an unchecked gap.
+  Integration is direct HTTPS + X-Api-Key, or the remote MCP endpoint. The non-code
+  distribution surfaces the provider does offer are a Zapier connector
+  (https://developers.theorg.com/zapier), an embeddable org-chart widget
+  (https://developers.theorg.com/embed, captured in components/), and gzipped LDJSON
+  monthly snapshots over SFTP (https://developers.theorg.com/flat-files).
+  Because official_package_count is 0, NO `SDKs` pointer is emitted in apis.yml — the
+  sdk_count checks must not fire for a provider that publishes no SDK.
