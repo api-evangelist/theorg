@@ -11,7 +11,9 @@ server:
   transport: streamable-http
   url: https://api.theorg.com/v1.1/mcp
   protocol: json-rpc-2.0
-  protocol_versions: ['2025-11-25', '2025-03-26']
+  protocol_versions:
+  - '2025-11-25'
+  - '2025-03-26'
   protocol_version_header: MCP-Protocol-Version
   auth:
     type: apiKey
@@ -26,27 +28,17 @@ server:
 deployment:
   mode: remote
   endpoint: https://api.theorg.com/v1.1/mcp
-  auth: api-key
-  auth_note: >-
-    An OAuth 2.1 authorization server also protects this endpoint (scope `mcp`, dynamic
-    client registration) and is advertised in the 401 WWW-Authenticate challenge, but the
-    provider documents only the X-Api-Key header, so api-key is the supported path.
   verified: probed
-  probe:
-    url: https://api.theorg.com/v1.1/mcp
-    method: POST
-    body: '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-    http_status: 401
-    www_authenticate: 'Bearer realm="mcp",resource_metadata="https://api.theorg.com/.well-known/oauth-protected-resource/v1.1/mcp",scope=mcp'
-    response: '{"error":{"code":401,"reason":"Missing credentials. Provide Authorization: Bearer, X-Api-Key, or the api_key query parameter."}}'
-    server_header: akka-http/10.2.10
-  checked: '2026-08-14'
+  probe: gated
+  checked: '2026-09-11'
+  source: claimed-backlog re-probe 2026-09-11
+  probe_prior: http-400
+  probe_why: RFC 9728 challenge on the MCP path only
 client_configuration:
-  note: >-
-    Verbatim from https://developers.theorg.com/mcp/get-started. Cursor connects to the
-    remote endpoint natively; Claude Desktop bridges to it through the third-party
-    `mcp-remote` npm package. `mcp-remote` is a generic community bridge, NOT a
-    first-party The Org stdio server — the deployment mode is remote, not both.
+  note: Verbatim from https://developers.theorg.com/mcp/get-started. Cursor connects to the remote endpoint
+    natively; Claude Desktop bridges to it through the third-party `mcp-remote` npm package. `mcp-remote`
+    is a generic community bridge, NOT a first-party The Org stdio server — the deployment mode is remote,
+    not both.
   cursor:
     type: streamableHttp
     url: https://api.theorg.com/v1.1/mcp
@@ -54,16 +46,19 @@ client_configuration:
       X-Api-Key: YOUR_API_KEY
   claude_desktop:
     command: npx
-    args: ['-y', 'mcp-remote', 'https://api.theorg.com/v1.1/mcp', '--header', 'X-Api-Key:${THEORG_API_KEY}']
+    args:
+    - -y
+    - mcp-remote
+    - https://api.theorg.com/v1.1/mcp
+    - --header
+    - X-Api-Key:${THEORG_API_KEY}
   api_key_source: https://theorg.com/subscription#api
 tools_introspection:
   method: gated
-  note: >-
-    Live `tools/list` requires credentials (401 unauthenticated), so the tool list below
-    is transcribed from the provider's published MCP tool catalog rather than from live
-    introspection. Names, descriptions, limits and credit costs are provider-published;
-    per-tool JSON Schema inputSchema/outputSchema require an authenticated tools/list.
-    The 2026-08-13 changelog states MCP tools now include a JSON Schema `outputSchema`.
+  note: Live `tools/list` requires credentials (401 unauthenticated), so the tool list below is transcribed
+    from the provider's published MCP tool catalog rather than from live introspection. Names, descriptions,
+    limits and credit costs are provider-published; per-tool JSON Schema inputSchema/outputSchema require
+    an authenticated tools/list. The 2026-08-13 changelog states MCP tools now include a JSON Schema `outputSchema`.
 tools:
 - name: search_companies
   description: Look up companies by name, domain, email, or LinkedIn company URL/slug.
@@ -77,10 +72,8 @@ tools:
   description: Get an iframe embed URL for a company's org chart.
   cost: free
   rest_equivalent: GET /v1.2/companies/org-chart
-  note: >-
-    Diverged from REST on 2026-08-13 — the tool now returns a signed iframe embed URL
-    (/embeds/org-chart/{signature}) and is free, while the REST endpoint returns
-    ChartNode JSON and costs 10 credits.
+  note: Diverged from REST on 2026-08-13 — the tool now returns a signed iframe embed URL (/embeds/org-chart/{signature})
+    and is free, while the REST endpoint returns ChartNode JSON and costs 10 credits.
 - name: find_person
   description: Look up a specific person by LinkedIn URL/slug, or by full name + company name/domain.
   cost: free
@@ -105,9 +98,8 @@ tools:
   cost: 1 credit per returned row
   limits: max 25 results per call
   rest_equivalent: POST /v1.1/positions
-  note: >-
-    The REST endpoint allows limit up to 1000 and offset up to 10000; the MCP tool caps
-    a call at 25 rows.
+  note: The REST endpoint allows limit up to 1000 and offset up to 10000; the MCP tool caps a call at
+    25 rows.
 - name: resolve_contacts
   description: Resolve work emails for up to 25 people.
   cost: 1 credit per person newly resolved
@@ -133,17 +125,14 @@ tools:
   cost: free
   rest_equivalent: GET /v1.1/usage
 credits:
-  note: >-
-    "Credits are deducted from the same balance as your API usage. List tools do not
-    consume credits. Re-resolving a contact your account has already paid for is free."
+  note: '"Credits are deducted from the same balance as your API usage. List tools do not consume credits.
+    Re-resolving a contact your account has already paid for is free."'
   source: https://developers.theorg.com/mcp
-notes: >-
-  The Org exposes an official remote MCP server over Streamable HTTP (each JSON-RPC
-  message is a separate POST; GET/SSE streaming is unsupported). Clients follow the
-  standard handshake (initialize -> notifications/initialized -> tools/list / tools/call).
-  The tool surface grew from 4 tools at the 2026-07-21 pass to 13 across four releases
-  (2026-07-22, 2026-07-23, and two on 2026-08-13), and is now materially WIDER than the
-  REST API: only 5 of 13 tools have a documented REST equivalent. MCP is the primary
-  surface for company search, person lookup, jobs, reports and contact resolution — none
-  of which the REST API exposes.
+notes: 'The Org exposes an official remote MCP server over Streamable HTTP (each JSON-RPC message is a
+  separate POST; GET/SSE streaming is unsupported). Clients follow the standard handshake (initialize
+  -> notifications/initialized -> tools/list / tools/call). The tool surface grew from 4 tools at the
+  2026-07-21 pass to 13 across four releases (2026-07-22, 2026-07-23, and two on 2026-08-13), and is now
+  materially WIDER than the REST API: only 5 of 13 tools have a documented REST equivalent. MCP is the
+  primary surface for company search, person lookup, jobs, reports and contact resolution — none of which
+  the REST API exposes.'
 crosswalk: mcp/theorg-tool-crosswalk.yml
